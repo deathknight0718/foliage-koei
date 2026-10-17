@@ -1,0 +1,7 @@
+[package]
+name = "koei-san14"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+
+[dependencies]

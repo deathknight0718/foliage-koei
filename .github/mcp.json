@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "rea": {
+      "type": "local",
+      "command": "cmd.exe",
+      "args": ["/d", "/c", "npx", "-y", "rea-agents@6.5.0", "mcp"],
+      "env": {
+        "GHIDRA_INSTALL_DIR": "F:\\Softwares\\Ghidra"
+      },
+      "tools": ["*"]
+    }
+  }
+}
