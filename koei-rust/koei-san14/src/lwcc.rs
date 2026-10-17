@@ -21,10 +21,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use anyhow::{Result, anyhow, bail};
+use anyhow::Result;
+use anyhow::{anyhow, bail};
+use binrw::BinReaderExt;
+use std::io::Cursor;
+
+// ----------------------------------------------------------------------------
 
 pub const LWC_MAGIC: u32 = u32::from_le_bytes(*b"LWC\x1A");
-pub const LWC_HEADER_SIZE: usize = 0x10C;
+pub const LWC_HEAD_SIZE: usize = 0x10C;
 pub const LWC_OFFSET: usize = 0x2F2;
 
 // ----------------------------------------------------------------------------
@@ -66,7 +71,7 @@ pub const SYMBOL_BASE: [usize; 32] = [
 
 // ----------------------------------------------------------------------------
 
-fn code_length(prefix: u8) -> usize {
+fn read_length(prefix: u8) -> usize {
     match prefix {
         0x00..=0x7F => 1,
         0x80..=0xBF => 2,
@@ -80,76 +85,61 @@ fn code_length(prefix: u8) -> usize {
     }
 }
 
-// ----------------------------------------------------------------------------
-
-struct LwcBitReader<'a> {
-    bytes: &'a [u8],
-    position: usize,
-    code: usize,
-    available: usize,
+fn read_byte(cursor: &mut Cursor<&[u8]>) -> Result<usize> {
+    Ok(usize::from(BinReaderExt::read_le::<u8>(cursor).map_err(|_| anyhow!("LWC bitstream ended before the declared output length"))?))
 }
 
-impl<'a> LwcBitReader<'a> {
-    fn new(bytes: &'a [u8]) -> Self {
-        Self { bytes, position: 0, code: 0, available: 0 }
-    }
-    fn next_byte(&mut self) -> Result<usize> {
-        let byte = *self.bytes.get(self.position).ok_or_else(|| anyhow!("LWC bitstream ended before the declared output length"))?;
-        self.position += 1;
-        Ok(usize::from(byte))
-    }
-    fn read_symbol(&mut self) -> Result<usize> {
-        self.code &= 0xFF;
-        let mut carried = 0;
-        let mut length = code_length(self.code as u8);
-        if self.available < length {
-            loop {
-                self.code = self.next_byte()?;
-                carried += self.available;
-                length = code_length(self.code as u8);
-                self.available = 8;
-                if length <= 8 {
-                    break;
-                }
+fn read_symbol(cursor: &mut Cursor<&[u8]>, code: &mut usize, available: &mut usize) -> Result<usize> {
+    *code &= 0xFF;
+    let mut carried = 0;
+    let mut length = read_length(*code as u8);
+    if *available < length {
+        loop {
+            *code = read_byte(cursor)?;
+            carried += *available;
+            length = read_length(*code as u8);
+            *available = 8;
+            if length <= 8 {
+                break;
             }
         }
-        let total = carried + length;
-        let remaining = self.available - length;
-        self.code = (self.code << length) & 0xFF;
-        let value = if remaining < total {
-            let required = total - remaining;
-            let mut value = self.code >> (8 - remaining);
-            let mut byte = self.next_byte()?;
-            if required > 8 {
-                let mut whole_bytes = (required - 9) / 8 + 1;
-                let tail = required - whole_bytes * 8;
-                while whole_bytes != 0 {
-                    value = (value << 8) | byte;
-                    byte = self.next_byte()?;
-                    whole_bytes -= 1;
-                }
-                self.available = 8 - tail;
-                self.code = byte << tail;
-                (self.code >> 8) | (value << tail)
-            } else {
-                self.available = 8 - required;
-                self.code = byte << required;
-                (self.code >> 8) | (value << required)
-            }
-        } else {
-            self.available = remaining - total;
-            self.code <<= total;
-            self.code >> 8
-        };
-        SYMBOL_BASE.get(total).and_then(|base| base.checked_add(value)).ok_or_else(|| anyhow!("LWC symbol {value} cannot be decoded"))
     }
+    let total = carried + length;
+    let remaining = *available - length;
+    *code = (*code << length) & 0xFF;
+    let value = if remaining < total {
+        let required = total - remaining;
+        let mut value = *code >> (8 - remaining);
+        let mut byte = read_byte(cursor)?;
+        if required > 8 {
+            let mut whole_bytes = (required - 9) / 8 + 1;
+            let tail = required - whole_bytes * 8;
+            while whole_bytes != 0 {
+                value = (value << 8) | byte;
+                byte = read_byte(cursor)?;
+                whole_bytes -= 1;
+            }
+            *available = 8 - tail;
+            *code = byte << tail;
+            (*code >> 8) | (value << tail)
+        } else {
+            *available = 8 - required;
+            *code = byte << required;
+            (*code >> 8) | (value << required)
+        }
+    } else {
+        *available = remaining - total;
+        *code <<= total;
+        *code >> 8
+    };
+    SYMBOL_BASE.get(total).and_then(|base| base.checked_add(value)).ok_or_else(|| anyhow!("LWC symbol {value} cannot be decoded"))
 }
 
 // ----------------------------------------------------------------------------
 
-pub fn decompress_lwc(bytes: &[u8]) -> Result<Vec<u8>> {
-    if bytes.len() < LWC_HEADER_SIZE {
-        bail!("LWC header requires 0x{LWC_HEADER_SIZE:X} bytes, found 0x{:X}", bytes.len());
+pub fn decompress(bytes: &[u8]) -> Result<Vec<u8>> {
+    if bytes.len() < LWC_HEAD_SIZE {
+        bail!("LWC header requires 0x{LWC_HEAD_SIZE:X} bytes, found 0x{:X}", bytes.len());
     }
     let magic = u32::from_le_bytes(bytes[..4].try_into().expect("checked LWC magic size"));
     if magic != LWC_MAGIC {
@@ -157,10 +147,12 @@ pub fn decompress_lwc(bytes: &[u8]) -> Result<Vec<u8>> {
     }
     let output_length = u32::from_le_bytes(bytes[4..8].try_into().expect("checked LWC length size")) as usize;
     let dictionary = &bytes[12..12 + 0x100];
-    let mut reader = LwcBitReader::new(&bytes[LWC_HEADER_SIZE..]);
+    let mut cursor = Cursor::new(&bytes[LWC_HEAD_SIZE..]);
+    let mut code = 0;
+    let mut available = 0;
     let mut output = Vec::with_capacity(output_length);
     while output.len() < output_length {
-        let symbol = reader.read_symbol()?;
+        let symbol = read_symbol(&mut cursor, &mut code, &mut available)?;
         if symbol < dictionary.len() {
             output.push(dictionary[symbol]);
             continue;
@@ -172,7 +164,7 @@ pub fn decompress_lwc(bytes: &[u8]) -> Result<Vec<u8>> {
         if distance == 0 || distance > output.len() {
             bail!("LWC back-reference distance {distance} exceeds {} decoded bytes", output.len());
         }
-        let length = reader.read_symbol()?.checked_add(3).ok_or_else(|| anyhow!("LWC match length overflows while decoding symbol {symbol}"))?;
+        let length = read_symbol(&mut cursor, &mut code, &mut available)?.checked_add(3).ok_or_else(|| anyhow!("LWC match length overflows while decoding symbol {symbol}"))?;
         for _ in 0..length {
             if output.len() == output_length {
                 break;

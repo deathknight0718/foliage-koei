@@ -21,47 +21,51 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use super::Record;
+use super::{Record, se_u8, se_utf16};
+use binrw::{BinRead, BinWrite};
+use serde::{Deserialize, Serialize};
+use std::io::Cursor;
 
+pub const INDEX: u32 = 0x01;
 pub const FLAG: &[u8; 16] = b"SN14SCEXVER0001\0";
 pub const SIZE: usize = 0x35;
-pub const INDEX: u32 = 0x01;
 
 #[repr(C)]
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+#[derive(BinRead, BinWrite, Clone, Debug, Default, Deserialize, PartialEq, Eq, Serialize)]
 pub struct RecordCity {
-    pub lp00: [u8; 08], // 0x00..0x07：名称 UTF-16LE
-    pub lp08: [u8; 20], // 0x08..0x1B：拼音 UTF-16LE
-    pub lp1c: [u8; 10], // 0x1C..0x25：未知
-    pub lp26: u8,       // 0x26：未知
-    pub lp27: u8,       // 0x27：城市 ID
-    pub lp28: [u8; 04], // 0x28..0x2B：未知
-    pub lp2c: [u8; 04], // 0x2C..0x2F：未知
-    pub lp30: [u8; 04], // 0x30..0x33：未知
-    pub lp34: u8,       // 0x34：州 ID
+    /// 0x00..0x07：名称 UTF-16LE
+    #[serde(serialize_with = "se_utf16")]
+    pub lp00: [u8; 08],
+    /// 0x08..0x1B：拼音 UTF-16LE
+    #[serde(serialize_with = "se_utf16")]
+    pub lp08: [u8; 20],
+    /// 0x1C..0x25：未知
+    #[serde(skip_serializing)]
+    pub lp1c: [u8; 10],
+    /// 0x26：未知
+    #[serde(skip_serializing)]
+    pub lp26: [u8; 01],
+    /// 0x27：城市 ID
+    #[serde(serialize_with = "se_u8")]
+    pub lp27: [u8; 01],
+    /// 0x28..0x2B：未知
+    #[serde(skip_serializing)]
+    pub lp28: [u8; 04],
+    /// 0x2C..0x2F：未知
+    #[serde(skip_serializing)]
+    pub lp2c: [u8; 04],
+    /// 0x30..0x33：未知
+    #[serde(skip_serializing)]
+    pub lp30: [u8; 04],
+    /// 0x34：州 ID
+    #[serde(serialize_with = "se_u8")]
+    pub lp34: [u8; 01],
 }
 
-impl Record for RecordCity {
-    fn flag() -> &'static [u8; 16] {
-        FLAG
-    }
-    fn index() -> u32 {
-        INDEX
-    }
-}
+impl Record for RecordCity {}
 
 impl From<&[u8]> for RecordCity {
     fn from(bytes: &[u8]) -> Self {
-        Self {
-            lp00: bytes[0x00..0x08].try_into().expect("record length was checked before parsing"), //
-            lp08: bytes[0x08..0x1C].try_into().expect("record length was checked before parsing"),
-            lp1c: bytes[0x1C..0x26].try_into().expect("record length was checked before parsing"),
-            lp26: bytes[0x26],
-            lp27: bytes[0x27],
-            lp28: bytes[0x28..0x2C].try_into().expect("record length was checked before parsing"),
-            lp2c: bytes[0x2C..0x30].try_into().expect("record length was checked before parsing"),
-            lp30: bytes[0x30..0x34].try_into().expect("record length was checked before parsing"),
-            lp34: bytes[0x34],
-        }
+        Self::read_le(&mut Cursor::new(bytes)).expect("record length was checked before parsing")
     }
 }

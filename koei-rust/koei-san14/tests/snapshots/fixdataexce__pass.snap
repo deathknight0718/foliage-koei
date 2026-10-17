@@ -1,0 +1,16 @@
+---
+source: koei-san14/tests/fixdataexce.rs
+expression: "write_to_csv(&records).expect(\"write pass CSV\")"
+---
+lp00,lp08,lp27
+无效,Wuxiao,0
+壶关,Huguan,1
+虎牢关,Hulaoguan,2
+潼关,Tongguan,3
+函谷关,Hanguguan,4
+武关,Wuguan,5
+阳平关,Yangpinggu,6
+白水关,Baishuigua,7
+剑阁,Jiange,8
+涪水关,Fushuiguan,9
+绵竹关,Mianzhugua,10

@@ -1,0 +1,28 @@
+---
+source: koei-san14/tests/fixdataexce.rs
+expression: "write_to_csv(&records).expect(\"write area CSV\")"
+---
+lp00,lp0a,lp18,lp1e,lp1f
+无效,Wuxiao,无效,0,0
+幽州,Youzhou,幽州,1,1
+并州,Bingzho,并州,1,2
+冀州,Jizhou,冀州,1,3
+青州,Qingzho,青州,2,4
+徐州,Xuzhou,徐州,2,5
+淮南,Huainan,淮南,2,6
+兖州,Yanzhou,兖州,2,7
+豫州,Yuzhou,豫州,2,8
+司隶,Sili,司隶,2,9
+京兆,Jingzha,京兆,3,10
+凉州,Liangzh,凉州,3,11
+扬州,Yangzho,扬州,4,12
+交州,Jiaozho,交州,4,13
+荆州北部,Jingbei,荆北,5,14
+荆州南部,Jingnan,荆南,5,15
+益州,Yizhou,益州,6,16
+南中,Nanzhon,南中,6,17
+乌桓,Wuhuan,乌桓,7,0
+鲜卑,Xianbei,鲜卑,8,0
+羌,Qiang,羌,9,0
+山越,Shanyue,山越,10,0
+南中,Nanzhon,南中,11,0

@@ -6,3 +6,9 @@ edition = { workspace = true }
 
 [dependencies]
 anyhow = { workspace = true }
+binrw = { workspace = true }
+serde = { workspace = true }
+
+[dev-dependencies]
+csv = { workspace = true }
+insta = { workspace = true }

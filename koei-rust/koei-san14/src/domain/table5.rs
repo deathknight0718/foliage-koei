@@ -22,38 +22,22 @@
  * SOFTWARE.
  */
 use super::Record;
+use binrw::{BinRead, BinWrite};
+use serde::{Deserialize, Serialize};
+use std::io::Cursor;
 
+pub const INDEX: u32 = 0x04;
 pub const FLAG: &[u8; 16] = b"SN14SCEXVER0001\0";
-pub const SIZE: usize = 0x28;
-pub const INDEX: u32 = 0x02;
+pub const SIZE: usize = 0;
 
-#[repr(C)]
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub struct RecordRegion {
-    pub lp00: [u8; 08], // 0x00..0x07：名称 UTF-16LE
-    pub lp08: [u8; 20], // 0x08..0x1B：拼音 UTF-16LE
-    pub lp1c: [u8; 10], // 0x1C..0x25：未知
-    pub lp26: u8,       // 0x26：未知
-    pub lp27: u8,       // 0x27：区域 ID
-}
+#[derive(BinRead, BinWrite, Clone, Debug, Default, Deserialize, PartialEq, Eq, Serialize)]
+#[brw(little)]
+pub struct RecordTable5 {}
 
-impl Record for RecordRegion {
-    fn flag() -> &'static [u8; 16] {
-        FLAG
-    }
-    fn index() -> u32 {
-        INDEX
-    }
-}
+impl Record for RecordTable5 {}
 
-impl From<&[u8]> for RecordRegion {
+impl From<&[u8]> for RecordTable5 {
     fn from(bytes: &[u8]) -> Self {
-        Self {
-            lp00: bytes[0x00..0x08].try_into().expect("record length was checked before parsing"), //
-            lp08: bytes[0x08..0x1C].try_into().expect("record length was checked before parsing"),
-            lp1c: bytes[0x1C..0x26].try_into().expect("record length was checked before parsing"),
-            lp26: bytes[0x26],
-            lp27: bytes[0x27],
-        }
+        Self::read_le(&mut Cursor::new(bytes)).expect("record length was checked before parsing")
     }
 }
