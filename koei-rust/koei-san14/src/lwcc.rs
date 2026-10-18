@@ -28,7 +28,6 @@ use std::io::Read;
 
 pub const LWC_MAGIC: u32 = u32::from_le_bytes(*b"LWC\x1A");
 pub const LWC_HEAD_SIZE: usize = 0x10C;
-pub const LWC_OFFSET: usize = 0x2F2;
 
 // ----------------------------------------------------------------------------
 
@@ -137,7 +136,8 @@ fn read_symbol(reader: &mut impl Read, code: &mut usize, available: &mut usize) 
 
 // ----------------------------------------------------------------------------
 
-pub fn decompress(reader: &mut impl Read) -> Result<Vec<u8>> {
+pub fn decompress(bytes: &[u8], offset: usize) -> Result<Vec<u8>> {
+    let mut reader = bytes.get(offset..).ok_or_else(|| anyhow::anyhow!("LWC payload begins at 0x{offset:X}, found only 0x{:X} bytes", bytes.len()))?;
     let mut header = [0; LWC_HEAD_SIZE];
     reader.read_exact(&mut header).map_err(|error| anyhow::anyhow!("LWC header requires 0x{LWC_HEAD_SIZE:X} bytes: {error}"))?;
     let magic = u32::from_le_bytes(header[..4].try_into().expect("fixed LWC magic size"));
@@ -148,7 +148,7 @@ pub fn decompress(reader: &mut impl Read) -> Result<Vec<u8>> {
     let mut available = 0;
     let mut output = Vec::with_capacity(output_length);
     while output.len() < output_length {
-        let symbol = read_symbol(reader, &mut code, &mut available)?;
+        let symbol = read_symbol(&mut reader, &mut code, &mut available)?;
         if symbol < dictionary.len() {
             output.push(dictionary[symbol]);
             continue;
@@ -156,7 +156,7 @@ pub fn decompress(reader: &mut impl Read) -> Result<Vec<u8>> {
         anyhow::ensure!(symbol >= dictionary.len(), "LWC symbol {symbol} cannot be decoded");
         let distance = symbol - dictionary.len();
         anyhow::ensure!(distance > 0 && distance <= output.len(), "LWC back-reference distance {distance} cannot be zero or exceed {} decoded bytes", output.len());
-        let length = read_symbol(reader, &mut code, &mut available)?.checked_add(3).ok_or_else(|| anyhow::anyhow!("LWC match length overflows while decoding symbol {symbol}"))?;
+        let length = read_symbol(&mut reader, &mut code, &mut available)?.checked_add(3).ok_or_else(|| anyhow::anyhow!("LWC match length overflows while decoding symbol {symbol}"))?;
         for _ in 0..length {
             if output.len() == output_length {
                 break;

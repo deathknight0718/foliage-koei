@@ -31,6 +31,7 @@ use std::io::{Cursor, Read};
 
 pub const EXPECTED_HEADER_VALUE: u32 = 0x66;
 
+const FIXDATAEXCE_LWC_OFFSET: usize = 0x2F2;
 const ENTRY_LIMIT: u32 = 0x0C;
 const ENTRY_SIZE: usize = 0x14;
 
@@ -61,10 +62,9 @@ impl TryFrom<&[u8]> for Fixdata {
     fn try_from(bytes: &[u8]) -> Result<Self> {
         let mut cursor = Cursor::new(bytes);
         let flag = FixdataHeader::read(&mut cursor)?.flag;
-        let offset = lwcc::LWC_OFFSET;
+        let offset = FIXDATAEXCE_LWC_OFFSET;
         anyhow::ensure!(bytes.len() >= offset, "fixdataexce version 1 payload begins at 0x{offset:X}, found only 0x{:X} bytes", bytes.len());
-        cursor.set_position(offset as u64);
-        let decompressed = lwcc::decompress(&mut cursor)?;
+        let decompressed = lwcc::decompress(bytes, offset)?;
         let mut cursor = Cursor::new(decompressed.as_slice());
         let count = FixdataDecodedHeader::read(&mut cursor)?.count;
         anyhow::ensure!(count <= ENTRY_LIMIT, "expected at most {ENTRY_LIMIT} leading records, found {count}");

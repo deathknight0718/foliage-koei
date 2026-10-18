@@ -4,12 +4,12 @@ use koei_san14::domain::{area, city, pass, province};
 use koei_san14::fixc::Fixdata;
 use koei_san14::lwcc;
 use serde::Serialize;
-use std::io::Cursor;
 use std::path::Path;
 
 const FIXDATAEXCE_PATH: &str = "../../.resources/Romance_of_the_Three_Kingdoms_14/0010_SC/fixdataexce.s14";
 const FIXDATA_PATH: &str = "../../.resources/Romance_of_the_Three_Kingdoms_14/0010_SC/fixdata.s14";
 const DATA_DIRECTORY: &str = "../../.data";
+const FIXDATAEXCE_LWC_OFFSET: usize = 0x2F2;
 const FIXDATA_LWC_OFFSET: usize = 0x1E0;
 
 fn write_to_csv<D: Serialize>(records: &[D]) -> AnyhowResult<String> {
@@ -61,8 +61,7 @@ fn test_data() -> AnyhowResult<()> {
 #[test]
 fn test_decompress_data() -> AnyhowResult<()> {
     let bytes = std::fs::read(FIXDATAEXCE_PATH)?;
-    let compressed = bytes.get(lwcc::LWC_OFFSET..).ok_or_else(|| anyhow::anyhow!("LWC payload begins at 0x{:X}, found only 0x{:X} bytes", lwcc::LWC_OFFSET, bytes.len()))?;
-    let decompressed = lwcc::decompress(&mut Cursor::new(compressed))?;
+    let decompressed = lwcc::decompress(&bytes, FIXDATAEXCE_LWC_OFFSET)?;
     let directory = Path::new(DATA_DIRECTORY);
     std::fs::create_dir_all(directory)?;
     std::fs::write(directory.join("fixdataexce.bin"), decompressed)?;
@@ -72,8 +71,7 @@ fn test_decompress_data() -> AnyhowResult<()> {
 #[test]
 fn test_decompress_fixdata() -> AnyhowResult<()> {
     let bytes = std::fs::read(FIXDATA_PATH)?;
-    let compressed = bytes.get(FIXDATA_LWC_OFFSET..).ok_or_else(|| anyhow::anyhow!("LWC payload begins at 0x{FIXDATA_LWC_OFFSET:X}, found only 0x{:X} bytes", bytes.len()))?;
-    let decompressed = lwcc::decompress(&mut Cursor::new(compressed))?;
+    let decompressed = lwcc::decompress(&bytes, FIXDATA_LWC_OFFSET)?;
     let directory = Path::new(DATA_DIRECTORY);
     std::fs::create_dir_all(directory)?;
     std::fs::write(directory.join("fixdata.bin"), decompressed)?;
