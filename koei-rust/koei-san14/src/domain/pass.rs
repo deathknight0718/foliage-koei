@@ -21,7 +21,8 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-use super::{Record, se_u8, se_utf16};
+use super::Record;
+use super::{se_t16, se_u08};
 use binrw::{BinRead, BinWrite};
 use serde::{Deserialize, Serialize};
 use std::io::Cursor;
@@ -34,10 +35,10 @@ pub const SIZE: usize = 0x28;
 #[brw(little)]
 pub struct RecordPass {
     /// 0x00..0x07：名称 UTF-16LE
-    #[serde(serialize_with = "se_utf16")]
+    #[serde(serialize_with = "se_t16")]
     pub lp00: [u8; 08],
     /// 0x08..0x1B：拼音 UTF-16LE
-    #[serde(serialize_with = "se_utf16")]
+    #[serde(serialize_with = "se_t16")]
     pub lp08: [u8; 20],
     /// 0x1C..0x25：未知
     #[serde(skip_serializing)]
@@ -46,7 +47,7 @@ pub struct RecordPass {
     #[serde(skip_serializing)]
     pub lp26: [u8; 01],
     /// 0x27：区域 ID
-    #[serde(serialize_with = "se_u8")]
+    #[serde(serialize_with = "se_u08")]
     pub lp27: [u8; 01],
 }
 

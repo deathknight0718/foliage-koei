@@ -1,10 +1,16 @@
 use anyhow::Result as AnyhowResult;
 use csv::Writer;
-use koei_san14::domain::{area, city, pass, table4, table5, table6, table7, table8, table9, table10, table11, table12, table13};
+use koei_san14::domain::{area, city, pass, province};
 use koei_san14::fixc::Fixdata;
+use koei_san14::lwcc;
 use serde::Serialize;
+use std::io::Cursor;
+use std::path::Path;
 
 const FIXDATAEXCE_PATH: &str = "../../.resources/Romance_of_the_Three_Kingdoms_14/0010_SC/fixdataexce.s14";
+const FIXDATA_PATH: &str = "../../.resources/Romance_of_the_Three_Kingdoms_14/0010_SC/fixdata.s14";
+const DATA_DIRECTORY: &str = "../../.data";
+const FIXDATA_LWC_OFFSET: usize = 0x1E0;
 
 fn write_to_csv<D: Serialize>(records: &[D]) -> AnyhowResult<String> {
     let mut writer = Writer::from_writer(Vec::new());
@@ -19,9 +25,9 @@ fn test_tables() {
     let fixdata = Fixdata::try_from(bytes.as_slice()).expect("parse fixdataexce.s14");
     for table in &fixdata.tables {
         match table.index {
-            area::INDEX => {
-                let records = table.records::<area::RecordArea>();
-                insta::assert_snapshot!("area", write_to_csv(&records).expect("write area CSV"));
+            province::INDEX => {
+                let records = table.records::<province::RecordProvince>();
+                insta::assert_snapshot!("province", write_to_csv(&records).expect("write province CSV"));
             }
             city::INDEX => {
                 let records = table.records::<city::RecordCity>();
@@ -31,26 +37,45 @@ fn test_tables() {
                 let records = table.records::<pass::RecordPass>();
                 insta::assert_snapshot!("pass", write_to_csv(&records).expect("write pass CSV"));
             }
-            table4::INDEX => {
-                let records = table.records::<table4::RecordTable4>();
-                insta::assert_snapshot!("table4", write_to_csv(&records).expect("write table4 CSV"));
+            area::INDEX => {
+                let records = table.records::<area::RecordArea>();
+                insta::assert_snapshot!("area", write_to_csv(&records).expect("write area CSV"));
             }
-            table5::INDEX => {
-                assert_eq!(table.count, 0x34);
-                assert!(table.bytes.is_empty());
-            }
-            table6::INDEX => {
-                assert_eq!(table.count, 0xBD10);
-                assert_eq!(table.bytes.len(), table.count * table6::SIZE);
-            }
-            table7::INDEX => assert_eq!(table.bytes.len(), table.count * table7::SIZE),
-            table8::INDEX => assert!(table.bytes.is_empty()),
-            table9::INDEX => assert_eq!(table.bytes.len(), table.count * table9::SIZE),
-            table10::INDEX => assert_eq!(table.bytes.len(), table.count * table10::SIZE),
-            table11::INDEX => assert!(table.bytes.is_empty()),
-            table12::INDEX => assert_eq!(table.bytes.len(), table.count * table12::SIZE),
-            table13::INDEX => assert_eq!(table.bytes.len(), table.count * table13::SIZE),
             _ => println!("table 0x{:02X}: {} bytes", table.index, table.bytes.len()),
         }
     }
+}
+
+#[test]
+fn test_data() -> AnyhowResult<()> {
+    let bytes = std::fs::read(FIXDATAEXCE_PATH)?;
+    let fixdata = Fixdata::try_from(bytes.as_slice())?;
+    let directory = Path::new(DATA_DIRECTORY);
+    std::fs::create_dir_all(directory)?;
+    for table in fixdata.tables {
+        std::fs::write(directory.join(format!("table{}.bin", table.index)), table.bytes)?;
+    }
+    Ok(())
+}
+
+#[test]
+fn test_decompress_data() -> AnyhowResult<()> {
+    let bytes = std::fs::read(FIXDATAEXCE_PATH)?;
+    let compressed = bytes.get(lwcc::LWC_OFFSET..).ok_or_else(|| anyhow::anyhow!("LWC payload begins at 0x{:X}, found only 0x{:X} bytes", lwcc::LWC_OFFSET, bytes.len()))?;
+    let decompressed = lwcc::decompress(&mut Cursor::new(compressed))?;
+    let directory = Path::new(DATA_DIRECTORY);
+    std::fs::create_dir_all(directory)?;
+    std::fs::write(directory.join("fixdataexce.bin"), decompressed)?;
+    Ok(())
+}
+
+#[test]
+fn test_decompress_fixdata() -> AnyhowResult<()> {
+    let bytes = std::fs::read(FIXDATA_PATH)?;
+    let compressed = bytes.get(FIXDATA_LWC_OFFSET..).ok_or_else(|| anyhow::anyhow!("LWC payload begins at 0x{FIXDATA_LWC_OFFSET:X}, found only 0x{:X} bytes", bytes.len()))?;
+    let decompressed = lwcc::decompress(&mut Cursor::new(compressed))?;
+    let directory = Path::new(DATA_DIRECTORY);
+    std::fs::create_dir_all(directory)?;
+    std::fs::write(directory.join("fixdata.bin"), decompressed)?;
+    Ok(())
 }

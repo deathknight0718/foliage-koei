@@ -22,21 +22,41 @@
  * SOFTWARE.
  */
 use super::Record;
+use super::{se_t16, se_u08};
 use binrw::{BinRead, BinWrite};
 use serde::{Deserialize, Serialize};
 use std::io::Cursor;
 
-pub const INDEX: u32 = 0x04;
+pub const INDEX: u32 = 0x00;
 pub const FLAG: &[u8; 16] = b"SN14SCEXVER0001\0";
-pub const SIZE: usize = 0;
+pub const SIZE: usize = 0x20;
 
 #[derive(BinRead, BinWrite, Clone, Debug, Default, Deserialize, PartialEq, Eq, Serialize)]
 #[brw(little)]
-pub struct RecordTable5 {}
+pub struct RecordProvince {
+    /// 0x00..0x09：名称 UTF-16LE
+    #[serde(serialize_with = "se_t16")]
+    pub lp00: [u8; 10],
+    /// 0x0A..0x17：拼音 UTF-16LE
+    #[serde(serialize_with = "se_t16")]
+    pub lp0a: [u8; 14],
+    /// 0x18..0x1B：显示名称 UTF-16LE
+    #[serde(serialize_with = "se_t16")]
+    pub lp18: [u8; 04],
+    /// 0x1C..0x1D：未知，当前均为 00 00
+    #[serde(skip_serializing)]
+    pub lp1c: [u8; 02],
+    /// 0x1E：区域 ID
+    #[serde(serialize_with = "se_u08")]
+    pub lp1e: [u8; 01],
+    /// 0x1F：地利 ID
+    #[serde(serialize_with = "se_u08")]
+    pub lp1f: [u8; 01],
+}
 
-impl Record for RecordTable5 {}
+impl Record for RecordProvince {}
 
-impl From<&[u8]> for RecordTable5 {
+impl From<&[u8]> for RecordProvince {
     fn from(bytes: &[u8]) -> Self {
         Self::read_le(&mut Cursor::new(bytes)).expect("record length was checked before parsing")
     }

@@ -1,6 +1,6 @@
 ---
 source: koei-san14/tests/fixdataexce.rs
-expression: "write_to_csv(&records).expect(\"write area CSV\")"
+expression: "write_to_csv(&records).expect(\"write province CSV\")"
 ---
 lp00,lp0a,lp18,lp1e,lp1f
 无效,Wuxiao,无效,0,0

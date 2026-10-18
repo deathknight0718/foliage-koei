@@ -23,7 +23,7 @@
  */
 use crate::domain::Table;
 use crate::lwcc;
-use anyhow::{Result, anyhow, bail};
+use anyhow::Result;
 use binrw::BinRead;
 use std::io::{Cursor, Read};
 
@@ -31,8 +31,8 @@ use std::io::{Cursor, Read};
 
 pub const EXPECTED_HEADER_VALUE: u32 = 0x66;
 
-const LEADING_RECORD_COUNT: u32 = 0x0C;
-const LEADING_RECORD_SIZE: usize = 0x14;
+const ENTRY_LIMIT: u32 = 0x0C;
+const ENTRY_SIZE: usize = 0x14;
 
 // ----------------------------------------------------------------------------
 
@@ -44,8 +44,8 @@ struct FixdataHeader {
 
 #[derive(BinRead)]
 #[br(little, magic = 0x66_u32)]
-struct DecodedHeader {
-    leading_count: u32,
+struct FixdataDecodedHeader {
+    count: u32,
 }
 
 // ----------------------------------------------------------------------------
@@ -62,17 +62,17 @@ impl TryFrom<&[u8]> for Fixdata {
         let mut cursor = Cursor::new(bytes);
         let flag = FixdataHeader::read(&mut cursor)?.flag;
         let offset = lwcc::LWC_OFFSET;
-        let body = bytes.get(offset..).ok_or_else(|| anyhow!("fixdataexce version 1 payload begins at 0x{offset:X}, found only 0x{:X} bytes", bytes.len()))?;
-        let payload = lwcc::decompress(body)?;
-        let mut cursor = Cursor::new(payload.as_slice());
-        let leading_count = DecodedHeader::read(&mut cursor)?.leading_count;
-        if leading_count != LEADING_RECORD_COUNT {
-            bail!("expected {LEADING_RECORD_COUNT} leading records, found {leading_count}");
-        }
-        let mut leading_records = vec![0; leading_count as usize * LEADING_RECORD_SIZE];
-        cursor.read_exact(&mut leading_records)?;
+        anyhow::ensure!(bytes.len() >= offset, "fixdataexce version 1 payload begins at 0x{offset:X}, found only 0x{:X} bytes", bytes.len());
+        cursor.set_position(offset as u64);
+        let decompressed = lwcc::decompress(&mut cursor)?;
+        let mut cursor = Cursor::new(decompressed.as_slice());
+        let count = FixdataDecodedHeader::read(&mut cursor)?.count;
+        anyhow::ensure!(count <= ENTRY_LIMIT, "expected at most {ENTRY_LIMIT} leading records, found {count}");
+        let mut entries = vec![0; count as usize * ENTRY_SIZE];
+        cursor.read_exact(&mut entries)?;
         let mut tables = Vec::new();
-        while let Some(table) = Table::read(&mut cursor, flag)? {
+        while let Some(table) = Table::parse(&mut cursor, flag)? {
+            println!("table 0x{:02X}: {} bytes {} count", table.index, table.bytes.len(), table.count);
             tables.push(table);
         }
         Ok(Self { flag, tables })

@@ -1,6 +1,5 @@
 ---
 source: koei-san14/tests/fixdataexce.rs
-assertion_line: 28
 expression: "write_to_csv(&records).expect(\"write city CSV\")"
 ---
 lp00,lp08,lp27,lp34
