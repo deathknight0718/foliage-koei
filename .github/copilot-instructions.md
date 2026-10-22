@@ -4,11 +4,12 @@
 
 ## 模块索引
 
-| 路径                                          | 说明                        |
-| --------------------------------------------- | --------------------------- |
-| `.resources/Romance_of_the_Three_Kingdoms_14` | 游戏的原始文件              |
-| `.resources/San14 Van Editor`                 | 游戏的修改器工具 Van Editor |
-| `koei-rust`                                   | 本项目的修改器核心工程目录  |
+| 路径                                          | 说明                         |
+| --------------------------------------------- | ---------------------------- |
+| `.resources/Romance_of_the_Three_Kingdoms_14` | 游戏的原始文件               |
+| `.resources/San14 Van Editor`                 | 游戏的修改器工具 Van Editor  |
+| `koei-rust`                                   | 本项目的修改器核心工程目录   |
+| `koei-exec`                                   | 本项目的修改器执行器前端工程 |
 
 ## 内容指引
 

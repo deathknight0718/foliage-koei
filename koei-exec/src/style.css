@@ -1,0 +1,216 @@
+@import "tailwindcss";
+@source "../../qaas-ui-core/src";
+
+@font-face {
+    font-family: "Sarasa";
+    src: url("./assets/font/SarasaFixedSC-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Sarasa Semi";
+    src: url("./assets/font/SarasaFixedSC-SemiBold.ttf") format("truetype");
+    font-weight: 600;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: "Sarasa Bold";
+    src: url("./assets/font/SarasaFixedSC-Bold.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+}
+
+html, body {
+    overflow: hidden;
+    height: 100vh;
+    font-family: "Sarasa Semi", sans-serif;
+}
+
+@theme {
+    --background-image-label-icon-036: url(/icons/icon036.png);
+    --background-image-label-icon-024: url(/icons/icon024.png);
+    --background-image-label-icon-020: url(/icons/icon020.png);
+    --background-image-label-icon-016: url(/icons/icon016.png);
+
+    --breakpoint-sm: 768px;
+    --breakpoint-md: 1024px;
+    --breakpoint-lg: 1280px;
+    --breakpoint-xl: 1440px;
+
+    --mui-spacing2: calc(var(--mui-spacing) * 2);
+    --mui-spacing3: calc(var(--mui-spacing) * 3);
+    --mui-spacing4: calc(var(--mui-spacing) * 4);
+    --mui-spacing8: calc(var(--mui-spacing) * 8);
+
+    --mui-font-mono: 400 1rem / 2 "Sarasa", monospace;
+
+    --color-dpt: rgba(0, 0, 0, 0.87);
+    --color-dst: rgba(0, 0, 0, 0.6);
+    --color-ddt: rgba(0, 0, 0, 0.38);
+
+    --color-lpt: rgba(255, 255, 255, 0.87);
+    --color-lst: rgba(255, 255, 255, 0.6);
+    --color-ldt: rgba(255, 255, 255, 0.38);
+
+    --text-body1: 1rem;
+    --text-body1--line-height: calc(1 + 8 / 16);
+    --text-body1--font-weight: 400;
+
+    --text-body2: 0.875rem;
+    --text-body2--line-height: calc(1 + 6 / 14);
+    --text-body2--font-weight: 400;
+
+    --text-icon: 0.725rem;
+    --text-icon--line-height: calc(1 + 4 / 12);
+    --text-icon--font-weight: 400;
+
+    --text-subtitle1: 1rem;
+    --text-subtitle1--line-height: calc(1 + 12 / 16);
+    --text-subtitle1--font-weight: 400;
+
+    --text-subtitle2: 0.875rem;
+    --text-subtitle2--line-height: calc(1 + 08 / 14);
+    --text-subtitle2--font-weight: 500;
+
+    --text-h1: 6rem;
+    --text-h1--line-height: calc(1 + 16 / 96);
+    --text-h1--font-weight: 400;
+
+    --text-h2: 3.75rem;
+    --text-h2--line-height: calc(1 + 12 / 60);
+    --text-h2--font-weight: 400;
+
+    --text-h3: 3rem;
+    --text-h3--line-height: calc(1 + 08 / 48);
+    --text-h3--font-weight: 400;
+
+    --text-h4: 2.125rem;
+    --text-h4--line-height: calc(1 + 08 / 34);
+    --text-h4--font-weight: 400;
+
+    --text-h5: 1.5rem;
+    --text-h5--line-height: calc(1 + 08 / 24);
+    --text-h5--font-weight: 400;
+
+    --text-h6: 1.25rem;
+    --text-h6--line-height: calc(1 + 12 / 20);
+    --text-h6--font-weight: 500;
+
+    --h-head: calc(var(--mui-spacing) * 6);
+    --w-side: calc(var(--mui-spacing) * 32);
+}
+
+@media (min-width: 768px) {
+    :root {
+        --h-head: calc(var(--mui-spacing) * 6);
+        --w-side: calc(var(--mui-spacing) * 32);
+    }
+}
+
+@layer utilities {
+    .h-main {
+        height: calc(100dvh - var(--h-head));
+    }
+    .h-head {
+        height: var(--h-head);
+    }
+    .w-main {
+        width: calc(100vw - var(--w-side));
+    }
+    .w-side {
+       width: var(--w-side);
+    }
+}
+
+@layer components {
+    #tv-attr-logo {
+        display: none;
+    }
+    .markdown-preview pre {
+        font: var(--mui-font-mono);
+        font-size: small;
+        padding: var(--mui-spacing2);
+        background-color: var(--mui-palette-grey-200);
+        overflow-x: auto;
+        margin: var(--mui-spacing2) 0;
+    }
+    .markdown-preview hr {
+        color: var(--mui-palette-grey-200);
+        padding: var(--mui-spacing2) 0;
+    }
+    .markdown-preview ol {
+        list-style-type: decimal;
+        padding: var(--mui-spacing) var(--mui-spacing3);
+    }
+    .markdown-preview ul {
+        list-style-type: disc;
+        padding: var(--mui-spacing) var(--mui-spacing3);
+    }
+    .markdown-preview li {
+        padding: 0 var(--mui-spacing);
+    }
+    .markdown-preview p {
+        font: var(--mui-font-body1);
+        padding: var(--mui-spacing) 0;
+    }
+    .markdown-preview h1 {
+        font: var(--mui-font-h3);
+        font-weight: bold;
+        color: var(--mui-palette-primary-main);
+        padding: var(--mui-spacing2) 0;
+    }
+    .markdown-preview h2 {
+        font: var(--mui-font-h4);
+        font-weight: bold;
+        color: var(--mui-palette-primary-main);
+        padding: var(--mui-spacing2) 0;
+    }
+    .markdown-preview h3 {
+        font: var(--mui-font-h5);
+        font-weight: bold;
+        color: var(--mui-palette-primary-main);
+        padding: var(--mui-spacing2) 0;
+    }
+    .markdown-preview h4 {
+        font: var(--mui-font-h6);
+        font-weight: bold;
+        padding: var(--mui-spacing) 0;
+    }
+    .markdown-preview h5 {
+        font: var(--mui-font-subtitle1);
+        font-weight: bold;
+        padding: var(--mui-spacing) 0;
+    }
+
+    .markdown-preview h6 {
+        font: var(--mui-font-subtitle2);
+        font-weight: bold;
+        padding: var(--mui-spacing) 0;
+    }
+    .markdown-preview table {
+        table-layout: auto;
+        width: 100%;
+        margin: var(--mui-spacing4) auto;
+        border-collapse: collapse;
+        box-shadow: var(--mui-shadows-3);
+    }
+    .markdown-preview td, .markdown-preview th {
+        font: var(--mui-font-body2);
+        border: 1px solid var(--mui-palette-primary-main);
+        min-width: var(--mui-spacing4);
+        padding: var(--mui-spacing);
+    }
+    .markdown-preview th {
+        color: var(--mui-palette-primary-contrastText);
+        background-color: var(--mui-palette-primary-light);
+    }
+    .markdown-preview img {
+        display: block;
+        max-width: 100%;
+        margin: var(--mui-spacing4) auto;
+        border: 1px solid var(--mui-palette-primary-main);
+        box-shadow: var(--mui-shadows-3);
+    }
+}
