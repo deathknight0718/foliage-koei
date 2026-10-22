@@ -13,11 +13,6 @@
     "${workspaceFolder}\\koei-rust\\Cargo.toml",
     "${workspaceFolder}\\koei-exec\\src-tauri\\Cargo.toml"
   ],
-  "rust-analyzer.cargo.extraEnv": {
-    "PATH": "C:\\Users\\folia\\.cargo\\bin;${env:PATH}",
-    "PYO3_PYTHON": "F:\\Python\\Python313\\python.exe",
-    "PROTOC": "F:\\Softwares\\Protoc\\bin\\protoc.exe"
-  },
   "debug.console.wordWrap": false,
   "editor.codeActionsOnSave": { "source.fixAll.eslint": "never" },
   "[python]": { "editor.defaultFormatter": "charliermarsh.ruff" },
