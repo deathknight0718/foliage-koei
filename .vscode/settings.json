@@ -1,6 +1,4 @@
 {
-  "window.zoomLevel": 1,
-  "python.defaultInterpreterPath": "F:\\Python\\Python313\\python.exe",
   "python.terminal.activateEnvironment": false,
   "python.terminal.activateEnvInCurrentTerminal": false,
   "dprint.path": "C:\\Users\\folia\\.dprint\\bin\\dprint.exe",
@@ -12,22 +10,15 @@
     "cursor-workspace": false
   },
   "rust-analyzer.linkedProjects": [
-    "${workspaceFolder}\\koei-rust\\Cargo.toml"
+    "${workspaceFolder}\\koei-rust\\Cargo.toml",
+    "${workspaceFolder}\\koei-exec\\src-tauri\\Cargo.toml"
   ],
   "rust-analyzer.cargo.extraEnv": {
     "PATH": "C:\\Users\\folia\\.cargo\\bin;${env:PATH}",
     "PYO3_PYTHON": "F:\\Python\\Python313\\python.exe",
     "PROTOC": "F:\\Softwares\\Protoc\\bin\\protoc.exe"
   },
-  "rust-analyzer.runnables.extraEnv": {
-    "PATH": "C:\\Users\\folia\\.cargo\\bin;F:\\Softwares\\OpenSSL\\bin;F:\\Softwares\\Protoc\\bin;${env:PATH}",
-    "PROTOC": "F:\\Softwares\\Protoc\\bin\\protoc.exe"
-  },
   "debug.console.wordWrap": false,
-  "terminal.integrated.env.windows": {
-    "PYO3_PYTHON": "F:\\Python\\Python313\\python.exe",
-    "PATH": "F:\\Softwares\\Protoc\\bin;${env:PATH}"
-  },
   "editor.codeActionsOnSave": { "source.fixAll.eslint": "never" },
   "[python]": { "editor.defaultFormatter": "charliermarsh.ruff" },
   "css.validate": false,
