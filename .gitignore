@@ -25,7 +25,6 @@ rustc-ice-*.txt
 
 # Custom additions
 .resources/
-.data/
 
 # Node.js / Vite / Tauri frontend
 logs
