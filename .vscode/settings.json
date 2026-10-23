@@ -2,7 +2,6 @@
   "python.terminal.activateEnvironment": false,
   "python.terminal.activateEnvInCurrentTerminal": false,
   "dprint.path": "C:\\Users\\folia\\.dprint\\bin\\dprint.exe",
-  "vscode_custom_css.imports": ["file:///F:/Projects/foliage-koei/.vscode/editor.css"],
   "chat.mcp.discovery.enabled": {
     "claude-desktop": false,
     "windsurf": false,
