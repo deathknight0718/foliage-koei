@@ -21,7 +21,6 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import IconTrade from "@mui/icons-material/CurrencyYen";
 import Button from "@mui/material/Button";
 import type { ReactNode } from "react";
 import { useEffect, useRef } from "react";
@@ -54,10 +53,10 @@ function useBackground() {
     return ref;
 }
 
-function ButtonRouter({ icon, label, route }: { icon: ReactNode; label: string; route: string }) {
+function ButtonRouter({ label, route }: { label: string; route: string }) {
     const { push } = useRouter();
     return (
-        <Button size="large" variant="contained" startIcon={icon} onClick={() => push(route)}>
+        <Button size="large" variant="contained" onClick={() => push(route)}>
             {label}
         </Button>
     );
@@ -71,10 +70,10 @@ function Home() {
         <Layout className="flex flex-col min-h-screen">
             <img src="/logo.svg" alt="Foliage Logo" width={131} height={32} className="fixed top-6 left-6" />
             <div className="fixed top-1/2 left-16 -translate-y-7/8">
-                <h1 className="text-h3 lg:text-h1">Foliage QAAS TDX</h1>
-                <p className="text-h5 lg:text-h4 mt-4">股票量化算法研究与分析插件（通达信）</p>
+                <h1 className="text-h3 lg:text-h1">Foliage Koei</h1>
+                <p className="text-h5 lg:text-h4 mt-4">光荣系列游戏数据修改工具</p>
                 <div className="flex items-center gap-4 mt-16">
-                    <ButtonRouter icon={<IconTrade fontSize="inherit" />} label="智能交易" route="/trade" />
+                    <ButtonRouter label="共享数据" route="/fixdata" />
                 </div>
             </div>
             <div ref={ref} className="fixed top-0 left-0 w-full h-full -z-10" />

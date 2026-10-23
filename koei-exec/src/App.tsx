@@ -27,6 +27,7 @@ import { ThemeProvider } from "@mui/material/styles";
 import { Suspense } from "react";
 import { HashRouter, Route, Routes } from "react-router-dom";
 import Loading from "./components/Loading";
+import Fixdata from "./pages/Fixdata";
 import Home from "./pages/Home";
 import { theme } from "./utils/theme";
 
@@ -43,6 +44,7 @@ function App() {
                     <CssBaseline />
                     <Routes>
                         <Route path="/" element={<Home />} />
+                        <Route path="/fixdata" element={<Fixdata />} />
                     </Routes>
                 </Suspense>
             </ThemeProvider>
