@@ -21,13 +21,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
-import "@koei-exec/style.css";
+import CssBaseline from "@mui/material/CssBaseline";
+import GlobalStyles from "@mui/material/GlobalStyles";
+import { ThemeProvider } from "@mui/material/styles";
+import { Suspense } from "react";
+import { HashRouter, Route, Routes } from "react-router-dom";
+import Loading from "./components/Loading";
+import Home from "./pages/Home";
+import { theme } from "./utils/theme";
+
+import "./style.css";
+import "./utils/i18nc";
 
 function App() {
+    const { muiTheme } = theme();
     return (
-        <main className="container">
-            <h1>Welcome to Tauri + React</h1>
-        </main>
+        <HashRouter>
+            <GlobalStyles styles="@layer theme, base, mui, components, utilities;" />
+            <ThemeProvider theme={muiTheme}>
+                <Suspense fallback={<Loading />}>
+                    <CssBaseline />
+                    <Routes>
+                        <Route path="/" element={<Home />} />
+                    </Routes>
+                </Suspense>
+            </ThemeProvider>
+        </HashRouter>
     );
 }
 

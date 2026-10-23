@@ -9,7 +9,7 @@ export default defineConfig(() => ({
     plugins: [react()],
     resolve: {
         alias: {
-            "@koei-exec": path.resolve(__dirname, "./src"),
+            "@koei-exec": path.resolve(import.meta.dirname, "./src"),
         },
     },
     // Vite options tailored for Tauri development and only applied in `tauri dev` or `tauri build`
