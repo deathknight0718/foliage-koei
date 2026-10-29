@@ -25,6 +25,7 @@ pub mod domain;
 pub mod fixc;
 pub mod lwcc;
 pub mod msgc;
+pub mod rdbc;
 
 // ----------------------------------------------------------------------------
 
