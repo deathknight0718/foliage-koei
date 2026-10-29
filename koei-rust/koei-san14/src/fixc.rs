@@ -22,7 +22,7 @@
  * SOFTWARE.
  */
 use binrw::{BinRead, BinWrite};
-use serde::{Serialize, Serializer};
+use serde::Serialize;
 
 // ----------------------------------------------------------------------------
 
