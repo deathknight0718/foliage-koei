@@ -1,0 +1,15 @@
+[package]
+name = "koei-san14"
+version = { workspace = true }
+authors = { workspace = true }
+edition = { workspace = true }
+
+[dependencies]
+anyhow = { workspace = true }
+binrw = { workspace = true }
+serde = { workspace = true }
+flate2 = { workspace = true }
+
+[dev-dependencies]
+csv = { workspace = true }
+insta = { workspace = true }
