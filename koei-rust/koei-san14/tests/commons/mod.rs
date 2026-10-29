@@ -1,9 +1,7 @@
-pub const PATH_DATA: &str = "../../.data";
-
 #[macro_export]
 macro_rules! path {
     ($name:expr, $extension:expr) => {
-        format!("{}/{}{}", $crate::commons::PATH_DATA, $name, $extension)
+        format!("../../.data/{}{}", $name, $extension)
     };
 }
 
