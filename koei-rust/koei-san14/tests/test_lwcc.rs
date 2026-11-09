@@ -4,7 +4,7 @@ use binrw::BinWrite;
 use koei_san14::lwcc::decompress;
 use std::io::Cursor;
 
-const NAME: &str = "configS_exce_SC";
+const NAME: &str = "prdataN";
 
 #[test]
 fn test_decode() -> anyhow::Result<()> {
