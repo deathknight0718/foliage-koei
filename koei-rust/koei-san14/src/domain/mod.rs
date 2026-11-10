@@ -22,6 +22,7 @@
  * SOFTWARE.
  */
 pub mod fixdata;
+pub mod fixdataex;
 pub mod fixdataexec;
 pub mod msgdata;
 pub mod msgdataexec;
