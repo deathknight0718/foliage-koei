@@ -24,6 +24,7 @@
 pub mod fixdata;
 pub mod fixdataex;
 pub mod fixdataexec;
+pub mod scedaex;
 pub mod msgdata;
 pub mod msgdataexec;
 pub mod msggame;

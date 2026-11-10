@@ -28,8 +28,13 @@ use std::cmp::Reverse;
 
 pub const LWC_MAGIC: u32 = u32::from_le_bytes(*b"LWC\x1A");
 pub const LWC_HEAD_SIZE: usize = 0x10C;
+
+// ----------------------------------------------------------------------------
+
 const DICTIONARY_SIZE: usize = 0x100;
 const MIN_MATCH: usize = 3;
+
+// ----------------------------------------------------------------------------
 
 pub const SYMBOL_BASE: [usize; 32] = {
     let mut bases = [0; 32];
@@ -40,6 +45,8 @@ pub const SYMBOL_BASE: [usize; 32] = {
     }
     bases
 };
+
+// ----------------------------------------------------------------------------
 
 struct BitReader<'a> {
     bytes: &'a [u8],
@@ -150,6 +157,8 @@ fn match_hash(bytes: &[u8]) -> usize {
     (usize::from(bytes[0]) * 251 * 251 + usize::from(bytes[1]) * 251 + usize::from(bytes[2])) & 0xFFFF
 }
 
+// ----------------------------------------------------------------------------
+
 struct MatchFinder<'a> {
     payload: &'a [u8],
     literal_bits: Vec<u64>,
@@ -168,7 +177,6 @@ impl<'a> MatchFinder<'a> {
         }
         Ok(Self { payload, literal_bits, heads: vec![usize::MAX; 0x10000], previous: vec![usize::MAX; payload.len()] })
     }
-
     fn find(&self, position: usize) -> Option<(usize, usize)> {
         const MAX_CANDIDATES: usize = 128;
         const MAX_DISTANCE: usize = u32::MAX as usize - 2 - DICTIONARY_SIZE;
@@ -203,7 +211,6 @@ impl<'a> MatchFinder<'a> {
         }
         best
     }
-
     fn insert(&mut self, start: usize, end: usize) {
         for index in start..end {
             if self.payload.len() - index < MIN_MATCH {

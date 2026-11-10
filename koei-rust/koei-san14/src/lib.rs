@@ -42,8 +42,12 @@ impl<T, E: std::error::Error + Send + Sync + 'static> AsAnyhowResult<T> for Resu
 // ----------------------------------------------------------------------------
 
 pub fn se_t16<S: serde::Serializer>(bytes: &[u8], serializer: S) -> core::result::Result<S::Ok, S::Error> {
-    let units = bytes.chunks_exact(2).map(|chunk| u16::from_le_bytes(chunk.try_into().expect("UTF-16LE unit size"))).collect::<Vec<_>>();
-    serializer.serialize_str(String::from_utf16_lossy(&units).trim_end_matches('\0'))
+    let chars = bytes //
+        .chunks_exact(2)
+        .map(|chunk| u16::from_le_bytes([chunk[0], chunk[1]]))
+        .take_while(|&unit| unit != 0)
+        .collect::<Vec<_>>();
+    serializer.serialize_str(&String::from_utf16_lossy(&chars))
 }
 
 pub fn se_u08<S: serde::Serializer>(bytes: &[u8; 1], serializer: S) -> core::result::Result<S::Ok, S::Error> {
@@ -54,8 +58,16 @@ pub fn se_u16<S: serde::Serializer>(bytes: &[u8; 2], serializer: S) -> core::res
     serializer.serialize_u16(u16::from_le_bytes(*bytes))
 }
 
+pub fn se_i16<S: serde::Serializer>(bytes: &[u8; 2], serializer: S) -> core::result::Result<S::Ok, S::Error> {
+    serializer.serialize_i16(i16::from_le_bytes(*bytes))
+}
+
 pub fn se_u32<S: serde::Serializer>(bytes: &[u8; 4], serializer: S) -> core::result::Result<S::Ok, S::Error> {
     serializer.serialize_u32(u32::from_le_bytes(*bytes))
+}
+
+pub fn se_i32<S: serde::Serializer>(bytes: &[u8; 4], serializer: S) -> core::result::Result<S::Ok, S::Error> {
+    serializer.serialize_i32(i32::from_le_bytes(*bytes))
 }
 
 pub fn se_hex<S: serde::Serializer>(bytes: &[u8], serializer: S) -> core::result::Result<S::Ok, S::Error> {
