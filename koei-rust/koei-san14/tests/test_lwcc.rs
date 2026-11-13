@@ -4,7 +4,7 @@ use binrw::BinWrite;
 use koei_san14::lwcc::decompress;
 use std::io::Cursor;
 
-const NAME: &str = "edithpdataexSC";
+const NAME: &str = "scedaex08";
 
 #[test]
 fn test_decode() -> anyhow::Result<()> {

@@ -58,7 +58,6 @@ impl<'a> BitReader<'a> {
     fn new(bytes: &'a [u8]) -> Self {
         Self { bytes, byte: 0, remaining: 0 }
     }
-
     fn read_bit(&mut self) -> Result<usize> {
         if self.remaining == 0 {
             let (&byte, rest) = self.bytes.split_first().context("LWC bitstream ended before the declared output length")?;
@@ -69,7 +68,6 @@ impl<'a> BitReader<'a> {
         self.remaining -= 1;
         Ok(usize::from((self.byte >> self.remaining) & 1))
     }
-
     fn read_symbol(&mut self) -> Result<usize> {
         let mut length = 1;
         while self.read_bit()? != 0 {
