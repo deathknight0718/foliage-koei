@@ -1,0 +1,30 @@
+{
+  // "window.zoomLevel": 1,
+  "python.terminal.activateEnvironment": false,
+  "python.terminal.activateEnvInCurrentTerminal": false,
+  "dprint.path": "C:\\Users\\folia\\.dprint\\bin\\dprint.exe",
+  "chat.mcp.discovery.enabled": {
+    "claude-desktop": false,
+    "windsurf": false,
+    "cursor-global": false,
+    "cursor-workspace": false
+  },
+  "rust-analyzer.linkedProjects": [
+    "${workspaceFolder}\\koei-rust\\Cargo.toml",
+    "${workspaceFolder}\\koei-exec\\src-tauri\\Cargo.toml"
+  ],
+  "debug.console.wordWrap": false,
+  "editor.codeActionsOnSave": { "source.fixAll.eslint": "never" },
+  "[python]": { "editor.defaultFormatter": "charliermarsh.ruff" },
+  "css.validate": false,
+  "css.lint.unknownAtRules": "ignore",
+  "workbench.editor.enablePreview": false,
+  "explorer.fileNesting.enabled": true,
+  "explorer.fileNesting.patterns": { "mod.rs": "*.rs", "lib.rs": "*.rs", "index.d.ts": "*.d.ts", "index.ts": "*.ts", "index.tsx": "*.tsx" },
+  "files.eol": "\n",
+  "chat.agentHost.copilot.executionSubagent.enabled": false,
+  "github.copilot.chat.executionSubagent.enabled": false,
+  "git.ignoreLimitWarning": true,
+  "editor.wordWrap": "off",
+  "editor.scrollbar.horizontal": "auto"
+}
