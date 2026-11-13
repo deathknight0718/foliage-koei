@@ -94,7 +94,6 @@ pub fn decode_index(bytes: &[u8]) -> Result<RdbIndex> {
     let header: RdbHeader = reader.read_le().context("RDB header")?;
     ensure!(u64::from(header.size) == HEADER_SIZE, "unexpected RDB header size {}", header.size);
     ensure!(u64::from(header.entry_count) <= (bytes.len() as u64 - HEADER_SIZE) / ENTRY_HEADER_SIZE, "RDB entry count exceeds file length");
-
     let mut entries = Vec::new();
     for index in 0..header.entry_count {
         let start = reader.position();
