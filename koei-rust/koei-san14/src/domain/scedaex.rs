@@ -25,7 +25,7 @@ use super::{Decoder, Encoder};
 use crate::AsAnyhowResult;
 use crate::fixc::{Row, Skip, Table};
 use crate::lwcc;
-use crate::{se_hex, se_i16, se_t16, se_u08};
+use crate::{se_i16, se_t16, se_u08, se_u32};
 use anyhow::Result;
 use binrw::{BinRead, BinWrite};
 use serde::Serialize;
@@ -125,32 +125,38 @@ impl TryInto<Vec<u8>> for FileHex {
 
 #[derive(BinRead, BinWrite, Serialize)]
 #[brw(little)]
-/// 0x0041 区域表
+/// 个性表
 pub struct Personality {
+    /// 名称
     #[serde(serialize_with = "se_t16")]
-    pub lp00: [u8; 0x0C],
+    pub name: [u8; 0x0C],
+    /// 拼音
     #[serde(serialize_with = "se_t16")]
-    pub lp01: [u8; 0x1A],
-    #[serde(serialize_with = "se_hex")]
-    pub lp02: [u8; 0x06],
-    #[serde(skip_serializing)]
-    pub lp03: [u8; 0x01],
-    #[serde(skip_serializing)]
-    pub lp04: [u8; 0x01],
-    #[serde(skip_serializing)]
-    pub lp05: [u8; 0x01],
-    #[serde(skip_serializing)]
-    pub lp06: [u8; 0x01],
-    #[serde(skip_serializing)]
-    pub lp07: [u8; 0x06],
+    pub enunciation: [u8; 0x20],
+    /// 条件 1
     #[serde(serialize_with = "se_u08")]
-    pub lp08: [u8; 0x01],
-    #[serde(serialize_with = "se_i16")]
-    pub lp09: [u8; 0x02],
+    pub cid1: [u8; 0x01],
+    /// 条件 2
     #[serde(serialize_with = "se_u08")]
-    pub lp0a: [u8; 0x01],
+    pub cid2: [u8; 0x01],
+    /// 条件值 1
+    #[serde(serialize_with = "se_u32")]
+    pub cval1: [u8; 0x04],
+    /// 条件值 2
+    #[serde(serialize_with = "se_u32")]
+    pub cval2: [u8; 0x04],
+    /// 效果 1
+    #[serde(serialize_with = "se_u08")]
+    pub eid1: [u8; 0x01],
+    /// 效果值 1
     #[serde(serialize_with = "se_i16")]
-    pub lp0b: [u8; 0x02],
+    pub eval1: [u8; 0x02],
+    /// 效果 2
+    #[serde(serialize_with = "se_u08")]
+    pub eid2: [u8; 0x01],
+    /// 效果值 2
+    #[serde(serialize_with = "se_i16")]
+    pub eval2: [u8; 0x02],
 }
 
 impl Row for Personality {}

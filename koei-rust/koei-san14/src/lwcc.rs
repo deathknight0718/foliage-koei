@@ -149,81 +149,7 @@ pub fn decompress(bytes: &[u8], offset: usize) -> Result<Vec<u8>> {
     Ok(output)
 }
 
-fn symbol_bit_length(symbol: usize) -> usize {
-    2 * (symbol + 2).ilog2() as usize
-}
-
-fn match_hash(bytes: &[u8]) -> usize {
-    (usize::from(bytes[0]) * 251 * 251 + usize::from(bytes[1]) * 251 + usize::from(bytes[2])) & 0xFFFF
-}
-
-// ----------------------------------------------------------------------------
-
-struct MatchFinder<'a> {
-    payload: &'a [u8],
-    literal_bits: Vec<u64>,
-    heads: Vec<usize>,
-    previous: Vec<usize>,
-}
-
-impl<'a> MatchFinder<'a> {
-    fn new(payload: &'a [u8], symbols: &[usize; DICTIONARY_SIZE]) -> Result<Self> {
-        let mut literal_bits = Vec::with_capacity(payload.len().checked_add(1).context("LWC payload is too large to index")?);
-        let mut bits = 0u64;
-        literal_bits.push(bits);
-        for &byte in payload {
-            bits += symbol_bit_length(symbols[usize::from(byte)]) as u64;
-            literal_bits.push(bits);
-        }
-        Ok(Self { payload, literal_bits, heads: vec![usize::MAX; 0x10000], previous: vec![usize::MAX; payload.len()] })
-    }
-    fn find(&self, position: usize) -> Option<(usize, usize)> {
-        const MAX_CANDIDATES: usize = 128;
-        const MAX_DISTANCE: usize = u32::MAX as usize - 2 - DICTIONARY_SIZE;
-        if self.payload.len() - position < MIN_MATCH {
-            return None;
-        }
-
-        let mut candidate = self.heads[match_hash(&self.payload[position..])];
-        let mut best = None;
-        let mut best_saving = 0;
-        for _ in 0..MAX_CANDIDATES {
-            if candidate == usize::MAX || position - candidate > MAX_DISTANCE {
-                break;
-            }
-            let distance = position - candidate;
-            let mut length = 0;
-            while position + length < self.payload.len() && self.payload[candidate + length] == self.payload[position + length] {
-                length += 1;
-            }
-            if length >= MIN_MATCH {
-                let cost = (symbol_bit_length(DICTIONARY_SIZE + distance) + symbol_bit_length(length - MIN_MATCH)) as u64;
-                let literals = self.literal_bits[position + length] - self.literal_bits[position];
-                if literals > cost && literals - cost > best_saving {
-                    best = Some((distance, length));
-                    best_saving = literals - cost;
-                }
-                if position + length == self.payload.len() {
-                    break;
-                }
-            }
-            candidate = self.previous[candidate];
-        }
-        best
-    }
-    fn insert(&mut self, start: usize, end: usize) {
-        for index in start..end {
-            if self.payload.len() - index < MIN_MATCH {
-                break;
-            }
-            let hash = match_hash(&self.payload[index..]);
-            self.previous[index] = self.heads[hash];
-            self.heads[hash] = index;
-        }
-    }
-}
-
-/// Encodes an LWC payload using literals and back-references.
+/// Encodes an LWC payload with the literal-only stream used by the game tools.
 pub fn compress(bytes: &[u8], offset: usize) -> Result<Vec<u8>> {
     let head = bytes.get(..offset).context("LWC prefix is missing or incomplete")?;
     let payload = bytes.get(offset..).context("LWC payload is missing")?;
@@ -244,20 +170,9 @@ pub fn compress(bytes: &[u8], offset: usize) -> Result<Vec<u8>> {
     for (index, &byte) in dictionary.iter().enumerate() {
         symbols[usize::from(byte)] = index;
     }
-    let mut matches = MatchFinder::new(payload, &symbols)?;
     let mut writer = BitWriter::new();
-    let mut position = 0;
-    while position < payload.len() {
-        let consumed = if let Some((distance, length)) = matches.find(position) {
-            writer.write_symbol(DICTIONARY_SIZE + distance)?;
-            writer.write_symbol(length - MIN_MATCH)?;
-            length
-        } else {
-            writer.write_symbol(symbols[usize::from(payload[position])])?;
-            1
-        };
-        matches.insert(position, position + consumed);
-        position += consumed;
+    for &byte in payload {
+        writer.write_symbol(symbols[usize::from(byte)])?;
     }
     let bitstream = writer.into_inner();
     let compressed_size = u32::try_from(bitstream.len()).context("LWC compressed payload exceeds the maximum encodable size")?;

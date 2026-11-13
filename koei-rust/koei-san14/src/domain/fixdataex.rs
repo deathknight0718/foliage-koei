@@ -25,7 +25,7 @@ use super::{Decoder, Encoder};
 use crate::AsAnyhowResult;
 use crate::fixc::{Row, Skip, Table};
 use crate::lwcc;
-use crate::{se_t16, se_u08};
+use crate::{se_i16, se_t16, se_u08, se_u16, se_u32};
 use anyhow::Result;
 use binrw::{BinRead, BinWrite};
 use serde::Serialize;
@@ -42,51 +42,45 @@ pub const HEAD_SIZE: usize = 0x02F2;
 #[brw(little)]
 pub struct FileHex {
     pub head: [u8; HEAD_SIZE],
-    pub tab00: Table<Skip<0x0014>>,
-    pub tab01: Table<Skip<0x0020>>,
-    pub tab02: Table<Skip<0x0035>>,
-    pub tab03: Table<Skip<0x0028>>,
-    pub tab04: Table<Skip<0x0002>>,
-    pub tab05: Table<Skip<0x0000>>,
-    pub tab06: Table<Skip<0x0003>>,
-    pub tab07: Table<Area>,
-    pub tab08: Table<Skip<0x0000>>,
-    pub tab09: Table<Skip<0x0033>>,
-    pub tab0a: Table<Skip<0x0035>>,
-    pub tab0b: Table<Skip<0x0000>>,
-    pub tab0c: Table<Skip<0x0098>>,
-    pub tab0d: Table<Skip<0x005E>>,
-    pub tab0e: Table<Skip<0x0016>>,
-    pub tab0f: Table<Skip<0x007F>>,
-    pub tab10: Table<Skip<0x00A6>>,
-    pub tab11: Table<Skip<0x002E>>,
-    pub tab12: Table<Skip<0x0066>>,
-    pub tab13: Table<Skip<0x0094>>,
-    pub tab14: Table<Skip<0x0015>>,
-    pub tab15: Table<Skip<0x000D>>,
-    pub tab16: Table<Skip<0x0000>>,
-    pub tab17: Table<Personality>,
+    pub tab00: Table<Skip<0x0052>>,
+    pub tab01: Table<Skip<0x0035>>,
+    pub tab02: Table<Skip<0x0028>>,
+    pub tab03: Table<Skip<0x0002>>,
+    pub tab04: Table<Skip<0x0000>>,
+    pub tab05: Table<Skip<0x0003>>,
+    pub tab06: Table<Skip<0x0041>>,
+    pub tab07: Table<Skip<0x0000>>,
+    pub tab08: Table<Skip<0x0033>>,
+    pub tab09: Table<Skip<0x0035>>,
+    pub tab0a: Table<Skip<0x0000>>,
+    pub tab0b: Table<Skip<0x0097>>,
+    pub tab0c: Table<Skip<0x005D>>,
+    pub tab0d: Table<Skip<0x0016>>,
+    pub tab0e: Table<Skip<0x007F>>,
+    pub tab0f: Table<Skip<0x00A4>>,
+    pub tab10: Table<Skip<0x002E>>,
+    pub tab11: Table<Skip<0x0066>>,
+    pub tab12: Table<Skip<0x0094>>,
+    pub tab13: Table<Skip<0x0015>>,
+    pub tab14: Table<Skip<0x000D>>,
+    pub tab15: Table<Skip<0x0000>>,
+    pub tab16: Table<Personality>,
+    pub tab17: Table<Skip<0x0000>>,
     pub tab18: Table<Skip<0x0000>>,
     pub tab19: Table<Skip<0x0000>>,
-    pub tab1a: Table<Skip<0x0000>>,
-    pub tab1b: Table<Skip<0x0086>>,
-    pub tab1c: Table<Skip<0x0000>>,
-    pub tab1d: Table<Skip<0x000B>>,
-    pub tab1e: Table<Skip<0x001A>>,
+    pub tab1a: Table<Skip<0x0086>>,
+    pub tab1b: Table<Skip<0x0000>>,
+    pub tab1c: Table<Skip<0x000B>>,
+    pub tab1d: Table<Skip<0x001A>>,
+    pub tab1e: Table<Skip<0x0000>>,
     pub tab1f: Table<Skip<0x0000>>,
-    pub tab20: Table<Skip<0x0000>>,
-    pub tab21: Table<Skip<0x000E>>,
+    pub tab20: Table<Skip<0x000E>>,
+    pub tab21: Table<Skip<0x0000>>,
     pub tab22: Table<Skip<0x0000>>,
-    pub tab23: Table<Skip<0x0000>>,
-    pub tab24: Table<Skip<0x00A8>>,
-    pub tab25: Table<Skip<0x0019>>,
-    pub tab26: Table<Skip<0x0035>>,
-    pub tab27: Table<Skip<0x0038>>,
-    pub tab28: Table<Skip<0x0004>>,
-    pub tab29: Table<Skip<0x0022>>,
-    pub tab2a: Table<Skip<0x0021>>,
-    pub tab2b: Table<Skip<0x0027>>,
-    pub tab2c: Table<Skip<0x0000>>,
+    pub tab23: Table<Skip<0x00A8>>,
+    pub tab24: Table<Skip<0x0019>>,
+    pub tab25: Table<Skip<0x0035>>,
+    pub tab26: Table<Skip<0x0000>>,
 }
 
 impl Decoder for FileHex {
@@ -129,60 +123,55 @@ impl TryInto<Vec<u8>> for FileHex {
 
 #[derive(BinRead, BinWrite, Serialize)]
 #[brw(little)]
-/// 0x0041 区域表
-pub struct Area {
-    #[serde(serialize_with = "se_t16")]
-    pub lp00: [u8; 0x0A],
-    #[serde(serialize_with = "se_t16")]
-    pub lp01: [u8; 0x1A],
-    #[serde(serialize_with = "se_u08")]
-    pub lp02: [u8; 0x01],
-    #[serde(skip_serializing)]
-    pub lp03: [u8; 0x02],
-    #[serde(skip_serializing)]
-    pub lp04: [u8; 0x02],
-    #[serde(skip_serializing)]
-    pub lp05: [u8; 0x02],
-    #[serde(skip_serializing)]
-    pub lp06: [u8; 0x02],
-    #[serde(skip_serializing)]
-    pub lp07: [u8; 0x02],
-    #[serde(skip_serializing)]
-    pub lp08: [u8; 0x10],
-    #[serde(skip_serializing)]
-    pub lp09: [u8; 0x01],
-    #[serde(skip_serializing)]
-    pub lp0a: [u8; 0x01],
-}
-
-impl Row for Area {}
-
-// ----------------------------------------------------------------------------
-
-#[derive(BinRead, BinWrite, Serialize)]
-#[brw(little)]
 pub struct Personality {
-    /// 名称 UTF-16LE
+    /// 名称
     #[serde(serialize_with = "se_t16")]
-    pub lp00: [u8; 0x0C],
-    /// 拼音 UTF-16LE
+    pub name: [u8; 0x0C],
+    /// 拼音
     #[serde(serialize_with = "se_t16")]
-    pub lp01: [u8; 0x20],
-    /// 备注 UTF-16LE
+    pub enunciation: [u8; 0x20],
+    /// 描述
     #[serde(serialize_with = "se_t16")]
-    pub lp02: [u8; 0x68],
-    /// 分隔符
-    #[serde(skip_serializing)]
-    pub lp03: [u8; 0x04],
+    pub note: [u8; 0x67],
+    /// 结束符?
+    #[serde(serialize_with = "se_t16")]
+    pub stop: [u8; 0x01],
+    /// 条件 1
+    #[serde(serialize_with = "se_u08")]
+    pub cid1: [u8; 0x01],
+    /// 条件 2
+    #[serde(serialize_with = "se_u08")]
+    pub cid2: [u8; 0x01],
+    /// 进阶条件
+    #[serde(serialize_with = "se_u16")]
+    pub flag: [u8; 0x02],
     /// 效果 1
     #[serde(serialize_with = "se_u08")]
-    pub lp04: [u8; 0x01],
+    pub eid1: [u8; 0x01],
+    /// 效果值 1
+    #[serde(serialize_with = "se_i16")]
+    pub eval1: [u8; 0x02],
     /// 效果 2
     #[serde(serialize_with = "se_u08")]
-    pub lp05: [u8; 0x01],
-    /// 未知
-    #[serde(skip_serializing)]
-    pub lp06: [u8; 0x10],
+    pub eid2: [u8; 0x01],
+    /// 效果值 2
+    #[serde(serialize_with = "se_i16")]
+    pub eval2: [u8; 0x02],
+    /// 类型，1：蓝色，2：红色，3：金色，5：未知
+    #[serde(serialize_with = "se_u08")]
+    pub color: [u8; 0x01],
+    /// 开关，反向二进制码，BB1: 负面个性， BB2: 出阵显示， BB3: 一心专用， BB4: 反馈触发， BB5: 允许玩家选择
+    #[serde(serialize_with = "se_u08")]
+    pub lp0b: [u8; 0x01],
+    /// 条件值 1
+    #[serde(serialize_with = "se_u32")]
+    pub cval1: [u8; 0x04],
+    /// 条件值 2
+    #[serde(serialize_with = "se_u32")]
+    pub cval2: [u8; 0x04],
+    /// 结尾符
+    #[serde(serialize_with = "se_u08")]
+    pub end: [u8; 0x01],
 }
 
 impl Row for Personality {}

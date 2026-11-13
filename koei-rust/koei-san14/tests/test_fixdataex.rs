@@ -10,16 +10,15 @@ const NAME: &str = "fixdataex";
 #[test]
 fn test_tables() -> anyhow::Result<()> {
     let bytes = bytes!(NAME, ".s14")?;
-    let data = FileHex::decode(bytes.as_slice()).expect("parse fixdataexce.s14");
-    snapshot!("area", &data.tab07.rows);
-    snapshot!("personality", &data.tab17.rows);
+    let data = FileHex::decode(bytes.as_slice()).expect("parse fixdataex.s14");
+    snapshot!("personality", &data.tab16.rows);
     Ok(())
 }
 
 #[test]
 fn test_decode() -> anyhow::Result<()> {
     let bytes = bytes!(NAME, ".s14")?;
-    let data = FileHex::decode(bytes.as_slice()).expect("parse fixdataexce.s14");
+    let data = FileHex::decode(bytes.as_slice()).expect("parse fixdataex.s14");
     let mut buffer = Cursor::new(Vec::new());
     data.write(&mut buffer)?;
     std::fs::write(path!(NAME, ".s14.unpack"), buffer.into_inner())?;
