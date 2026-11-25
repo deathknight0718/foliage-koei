@@ -11,7 +11,7 @@ const NAME: &str = "scedaex01";
 fn test_tables() -> anyhow::Result<()> {
     let bytes = bytes!(NAME, ".s14")?;
     let data = FileHex::decode(bytes.as_slice()).expect("parse scedaex*.s14");
-    snapshot!("personality", &data.tab16.rows);
+    insta::assert_snapshot!("personality", commons::snapshot(&data.tab16.rows)?);
     Ok(())
 }
 

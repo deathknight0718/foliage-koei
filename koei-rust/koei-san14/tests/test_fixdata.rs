@@ -11,8 +11,8 @@ const NAME: &str = "fixdata";
 fn test_tables() -> anyhow::Result<()> {
     let bytes = bytes!(NAME, ".s14")?;
     let data = FileHex::decode(bytes.as_slice()).expect("parse fixdata.s14");
-    snapshot!("area", &data.tab07.rows);
-    snapshot!("personality", &data.tab17.rows);
+    insta::assert_snapshot!("area", commons::snapshot(&data.tab07.rows)?);
+    insta::assert_snapshot!("personality", commons::snapshot(&data.tab17.rows)?);
     Ok(())
 }
 

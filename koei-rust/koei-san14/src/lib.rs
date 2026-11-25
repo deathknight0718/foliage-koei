@@ -50,6 +50,11 @@ pub fn se_t16<S: serde::Serializer>(bytes: &[u8], serializer: S) -> core::result
     serializer.serialize_str(&String::from_utf16_lossy(&chars))
 }
 
+/// Serializes a byte as a binary string with a `0B` prefix and eight digits.
+pub fn se_bit<S: serde::Serializer>(bytes: &[u8; 1], serializer: S) -> core::result::Result<S::Ok, S::Error> {
+    serializer.serialize_str(&format!("0b{:08b}", bytes[0]))
+}
+
 pub fn se_u08<S: serde::Serializer>(bytes: &[u8; 1], serializer: S) -> core::result::Result<S::Ok, S::Error> {
     serializer.serialize_u8(bytes[0])
 }

@@ -15,3 +15,4 @@ flate2 = { workspace = true }
 [dev-dependencies]
 csv = { workspace = true }
 insta = { workspace = true }
+serde_json = { workspace = true }

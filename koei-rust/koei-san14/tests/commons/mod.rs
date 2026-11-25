@@ -12,16 +12,9 @@ macro_rules! bytes {
     };
 }
 
-#[macro_export]
-macro_rules! snapshot {
-    ($name:expr, $value:expr) => {{
-        fn csv<D: serde::Serialize>(records: &[D]) -> anyhow::Result<String> {
-            let mut writer = csv::Writer::from_writer(Vec::new());
-            records.iter().try_for_each(|record| writer.serialize(record))?;
-            writer.flush()?;
-            Ok(String::from_utf8(writer.into_inner()?)?)
-        }
-
-        insta::assert_snapshot!($name, csv($value).expect(format!("write {}.csv", $name).as_str()));
-    }};
+pub fn snapshot<T: serde::Serialize>(records: &[T]) -> anyhow::Result<String> {
+    let mut writer = csv::Writer::from_writer(Vec::new());
+    records.iter().try_for_each(|record| writer.serialize(record))?;
+    writer.flush()?;
+    Ok(String::from_utf8(writer.into_inner()?)?)
 }

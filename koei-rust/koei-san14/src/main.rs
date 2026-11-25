@@ -48,6 +48,10 @@ enum Commands {
         #[arg(value_name = "DIRECTORY")]
         directory: PathBuf,
     },
+    Csvc {
+        #[arg(value_name = "DIRECTORY")]
+        directory: PathBuf,
+    },
 }
 
 // ---------------------------------------------------------------------------
@@ -57,6 +61,7 @@ fn main() -> Result<()> {
     let cli = Cli::parse();
     match &cli.command {
         Commands::Sync { directory } => { sync(directory)?; }
+        _ => {}
     }
     Ok(())
 }
@@ -64,11 +69,13 @@ fn main() -> Result<()> {
 // ---------------------------------------------------------------------------
 
 fn sync(directory: &PathBuf) -> anyhow::Result<()> {
+    const FIXDATAEX_FILENAME: &str = "fixdataex.s14";
+    const SCEDAEX_PATTERN: &str = r"^scedaex.*\.s14$";
     let entries = fs::read_dir(directory).with_context(|| format!("reading {}", directory.display()))?.map(|entry| entry.with_context(|| format!("reading an entry in {}", directory.display()))).collect::<anyhow::Result<Vec<_>>>()?;
-    let source_path = entries.iter().map(|entry| entry.path()).find(|path| path.file_name().is_some_and(|name| name == "fixdataex.s14")).with_context(|| format!("finding fixdataex.s14 in {}", directory.display()))?;
+    let source_path = entries.iter().map(|entry| entry.path()).find(|path| path.file_name().is_some_and(|name| name == FIXDATAEX_FILENAME)).with_context(|| format!("finding {}", FIXDATAEX_FILENAME))?;
     let bytes = fs::read(&source_path).with_context(|| format!("reading {}", source_path.display()))?;
     let source = fixdataex::FileHex::decode(&bytes).with_context(|| format!("parsing {}", source_path.display()))?;
-    let target_pattern = Regex::new(r"^scedaex.*\.s14$")?;
+    let target_pattern = Regex::new(SCEDAEX_PATTERN)?;
     for entry in entries {
         let path = entry.path();
         if !entry.file_type().with_context(|| format!("reading file type for {}", path.display()))?.is_file() || !target_pattern.is_match(&entry.file_name().to_string_lossy()) {
@@ -76,23 +83,7 @@ fn sync(directory: &PathBuf) -> anyhow::Result<()> {
         }
         let bytes = fs::read(&path).with_context(|| format!("reading {}", path.display()))?;
         let mut data = scedaex::FileHex::decode(&bytes).with_context(|| format!("parsing {}", path.display()))?;
-        data.tab16.rows = source
-            .tab16
-            .rows
-            .iter()
-            .map(|personality| scedaex::Personality {
-                name: personality.name, //
-                enunciation: personality.enunciation,
-                cid1: personality.cid1,
-                cid2: personality.cid2,
-                cval1: personality.cval1,
-                cval2: personality.cval2,
-                eid1: personality.eid1,
-                eval1: personality.eval1,
-                eid2: personality.eid2,
-                eval2: personality.eval2,
-            })
-            .collect();
+        data.tab16.rows = source.tab16.rows.iter().map(|it| scedaex::Personality { name: it.name, enunciation: it.enunciation, cid1: it.cid1, cid2: it.cid2, cval1: it.cval1, cval2: it.cval2, eid1: it.eid1, eval1: it.eval1, eid2: it.eid2, eval2: it.eval2 }).collect();
         fs::write(&path, data.encode()?).with_context(|| format!("writing {}", path.display()))?;
     }
     Ok(())

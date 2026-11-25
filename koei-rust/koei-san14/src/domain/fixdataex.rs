@@ -25,7 +25,7 @@ use super::{Decoder, Encoder};
 use crate::AsAnyhowResult;
 use crate::fixc::{Row, Skip, Table};
 use crate::lwcc;
-use crate::{se_i16, se_t16, se_u08, se_u16, se_u32};
+use crate::{se_bit, se_i16, se_t16, se_u08, se_u16, se_u32};
 use anyhow::Result;
 use binrw::{BinRead, BinWrite};
 use serde::Serialize;
@@ -161,7 +161,7 @@ pub struct Personality {
     #[serde(serialize_with = "se_u08")]
     pub color: [u8; 0x01],
     /// 开关，反向二进制码，BB1: 负面个性， BB2: 出阵显示， BB3: 一心专用， BB4: 反馈触发， BB5: 允许玩家选择
-    #[serde(serialize_with = "se_u08")]
+    #[serde(serialize_with = "se_bit")]
     pub lp0b: [u8; 0x01],
     /// 条件值 1
     #[serde(serialize_with = "se_u32")]
