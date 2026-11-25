@@ -5,7 +5,7 @@ use koei_san14::domain::scedaex::FileHex;
 use koei_san14::domain::{Decoder, Encoder};
 use std::io::Cursor;
 
-const NAME: &str = "scedaex01";
+const NAME: &str = "scedaex08";
 
 #[test]
 fn test_tables() -> anyhow::Result<()> {
